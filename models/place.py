@@ -1,9 +1,11 @@
 #!/usr/bin/python3
-from models import amenity
+
 from models.base_model import BaseModel
 
 
 class Place(BaseModel):
+    """ City Class.
+    """
     city_id = ""
     user_id = ""
     name = ""

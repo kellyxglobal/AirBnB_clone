@@ -1,8 +1,14 @@
-#!/usr/bin/python3
+# !/usr/bin/python3
 """ Stores objects in a file."""
 import json
 import os
-from datetime import datetime
+from models.base_model import BaseModel
+from models.user import User
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.place import Place
+from models.review import Review
 
 
 class FileStorage():
@@ -31,35 +37,27 @@ class FileStorage():
         """  Serializes `__objects` to the JSON file `__file_path`.
         """
         with open(FileStorage.__file_path, 'w') as json_file:
-            json.dump({k: v.to_dict() for k, v in FileStorage.__objects.items()}, json_file)
+            json.dump({k: v.to_dict()
+                      for k, v in FileStorage.__objects.items()}, json_file)
 
     def reload(self):
         """ Deserializes the JSON file `__file_path` if it exists,
             otherwise does nothing.
         """
+        objects_dict = {'BaseModel': BaseModel, 'User': User, 'State': State,
+        'City': City, 'Amenity': Amenity, 'Place': Place, 'Review': Review}
 
         if not os.path.exists(FileStorage.__file_path):
             return
 
         with open(FileStorage.__file_path, 'r') as json_file:
             json_to_python_obj = None
-
             try:
                 json_to_python_obj = json.load(json_file)
             except json.JSONDecodeError:
                 pass
-
             if json_to_python_obj is None:
                 return
-            
-            dict_obj = {}
 
-            for obj_id, obj_id_dict in json_to_python_obj.items():
-                dict_obj[obj_id] = {}
-                for k, v in obj_id_dict.items():
-                    if k == 'created_at' or k == 'updated_at':
-                            dict_obj[obj_id][k] = datetime.fromisoformat(v)
-                    else:
-                            dict_obj[obj_id][k] = v
-            FileStorage.__objects = dict_obj
-            return FileStorage.__objects
+            FileStorage.__objects = {key: objects_dict[key.split('.')[0]](**value)
+                                     for key, value in json_to_python_obj.items()}

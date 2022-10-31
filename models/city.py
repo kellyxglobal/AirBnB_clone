@@ -3,5 +3,8 @@ from models.base_model import BaseModel
 
 
 class City(BaseModel):
+    """ State Class.
+
+    """
     state_id = ""
     name = ""

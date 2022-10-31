@@ -3,7 +3,7 @@
 
 import uuid
 from datetime import datetime
-from models import storage
+import models
 
 
 class BaseModel():
@@ -24,7 +24,7 @@ class BaseModel():
                 *args: Not used
                 **kwargs: A keyword arguments constructor of a BaseModel.
         """
-        if kwargs is not None and len(kwargs):
+        if len(kwargs):
             for k, v in kwargs.items():
                 if k != '__class__':
                     if k == 'created_at' or k == 'updated_at':
@@ -32,11 +32,12 @@ class BaseModel():
                         setattr(self, k, v_to_datetime)
                     else:
                         setattr(self, k, v)
-        else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
-            storage.new(self)
+            return
+
+        self.id = str(uuid.uuid4())
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
+        models.storage.new(self)
 
     def __str__(self):
         """ Returns the string representation of a `BaseModel` instance.
@@ -51,7 +52,7 @@ class BaseModel():
             to a JSON file.
         """
         self.updated_at = datetime.now()
-        storage.save()
+        models.storage.save()
 
     def to_dict(self):
         """ Returns a dictionary containing all keys/values
@@ -61,4 +62,3 @@ class BaseModel():
                          else v.isoformat() for k, v in self.__dict__.items()}
         instance_dict['__class__'] = f'{type(self).__name__}'
         return (instance_dict)
-
